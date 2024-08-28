@@ -9,15 +9,38 @@ python3 github_events.py <username>
 """
 
 import sys
-import requests
+import json
+# import requests
+from urllib import request, error
 from rich import print as rich_print
+
+
+def get_user_acitivity_data(url: str) -> dict:
+    """get user data via http
+
+    Args:
+        url (str): url path to user data
+
+    Returns:
+        dict: response body
+    """
+    try:
+        with request.urlopen(url, timeout=10) as response:
+            data = response.read()
+            return data
+    except error.HTTPError as e:
+        print(f"HTTP Error code: {e.code}")
+    except error.URLError as e:
+        print(f"HTTP Error message: {e.reason}")
+
 
 def get_latest_events(username):
     """Fetch and display the latest GitHub events for a given username."""
     url = f"https://api.github.com/users/{username}/events"
-    response = requests.get(url, timeout=10)
-    if response.status_code == 200:
-        event = response.json()
+    # response = requests.get(url, timeout=10)
+    response = get_user_acitivity_data(url=url)
+    if response:
+        event = json.loads(response.decode('utf-8'))
         latest_events = event
         rich_print(f"Latest events for [bold green]{username}[/bold green]:")
         for event in latest_events:
